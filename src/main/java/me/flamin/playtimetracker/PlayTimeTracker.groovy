@@ -66,14 +66,14 @@ class PlayTimeTracker extends JavaPlugin {
                 return
             }
             final clazz = this.availableListeners[listener_name]
-            List<Object> args = Lists.<Object>asList(this);
-            args.addAll(clazz.signature.collect{ key ->
+            List<Object> args = Lists.<Object>asList(this)
+            clazz.signature.forEach { key ->
                 final conf = listener_configs.getConfigurationSection(listener_name)
                 if (!conf.contains(key)) {
                     throw new InstantiationException("Missing configuration entry for ${key} for listener ${listener_name}")
                 }
-                return conf.get(key)
-            })
+                args.add(conf.get(key))
+            }
             final listener = clazz.newInstance(args.toArray());
             this.server.pluginManager.registerEvents(listener, this)
             this.listeners.add(listener)
