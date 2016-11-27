@@ -34,6 +34,7 @@ class PlayTimeTracker extends JavaPlugin {
 
     private def timeoutHandlerRef
     private Runnable timeoutHandler = {
+        def expired_players = []
         lock.lock()
         try {
             last_active_time.iterator().with {iterator ->
@@ -50,13 +51,17 @@ class PlayTimeTracker extends JavaPlugin {
 
                     if (Seconds.secondsBetween(last_active, now).seconds > timeout_duration) {
                         logger.info("Expiring entry as ${player.name} has not done anything for ${Seconds.secondsBetween(last_active, now).seconds}s")
-                        this.logPlayerActivityChange(player, true)
+                        expired_players.add(player)
                         return iterator.remove()
                     }
                 }
             }
         } finally {
             lock.unlock()
+        }
+
+        expired_players.each {player ->
+            this.logPlayerActivityChange(player, true)
         }
     } as Runnable
 
@@ -86,16 +91,18 @@ class PlayTimeTracker extends JavaPlugin {
     }
 
     boolean onPlayerActivity(Player player, boolean log_change) {
+        def previous
         lock.lock()
         try {
-            def previous = this.last_active_time.put(player.uniqueId, DateTime.now())
-            if (previous == null && log_change) {
-                this.logPlayerActivityChange(player, false)
-            }
-            return previous == null
+            previous = this.last_active_time.put(player.uniqueId, DateTime.now())
         } finally {
             lock.unlock()
         }
+
+        if (previous == null && log_change) {
+            this.logPlayerActivityChange(player, false)
+        }
+        return previous == null
     }
 
     void logPlayerActivityChange(Player player, boolean isAfk) {
