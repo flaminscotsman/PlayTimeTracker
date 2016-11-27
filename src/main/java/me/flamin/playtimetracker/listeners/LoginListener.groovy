@@ -1,8 +1,10 @@
 package me.flamin.playtimetracker.listeners
 
+import com.avaje.ebean.Update
 import com.mongodb.client.MongoCollection
 import me.flamin.playtimetracker.PlayTimeTracker
 import groovy.sql.Sql
+import org.bson.Document
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -10,6 +12,10 @@ import org.bukkit.event.player.PlayerJoinEvent
 
 import java.sql.SQLException
 import java.util.logging.Level
+
+import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Updates.*;
+import com.mongodb.client.model.UpdateOptions;
 
 class LoginListener implements Listener {
     private static final query = """
@@ -32,19 +38,6 @@ class LoginListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     def playerJoinListener(PlayerJoinEvent event) {
-        def task = {
-            try {
-                def conn = this.plugin.getDatabase('Activity');
-                MongoCollection collection = db.Activity;
-
-                collection
-            } catch (SQLException e) {
-                this.plugin.logger.log(
-                        Level.WARNING, "Fatal error occured when saving session for ${event.player.name}", e
-                )
-            }
-        } as Runnable
-
-        this.plugin.server.scheduler.runTaskAsynchronously(this.plugin, task)
+        this.plugin.onPlayerActivity(event.player)
     }
 }
