@@ -3,3 +3,6 @@ enabled_listeners:
   movement:
     minimumDistance: 10
     duration: 30
+
+database:
+  connection: localhost

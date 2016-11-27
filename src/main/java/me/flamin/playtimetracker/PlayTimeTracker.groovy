@@ -3,10 +3,7 @@ package me.flamin.playtimetracker
 import com.google.common.collect.Lists
 import com.mongodb.MongoClient
 import com.mongodb.client.MongoDatabase
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import me.flamin.playtimetracker.activity_listeners.*
-import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
@@ -47,12 +44,12 @@ class PlayTimeTracker extends JavaPlugin {
     }
 
     public synchronized readConfig() {
-        this.reloadConfig();
+        this.reloadConfig()
 
-//        if (this.pool != null) {
-//            this.pool.close();
-//        }
-//        this.pool = this.buildConnectionPool()
+        if (this.pool != null) {
+            this.pool.close()
+        }
+        this.pool = new MongoClient(this.getConfig().getString('database.connection'))
 
         // Clean up any old activity_listeners
         listeners.each {listener ->
@@ -80,57 +77,6 @@ class PlayTimeTracker extends JavaPlugin {
             final listener = clazz.newInstance(args.toArray());
             this.server.pluginManager.registerEvents(listener, this)
             this.listeners.add(listener)
-        }
-    }
-
-    private HikariDataSource buildConnectionPool() throws IllegalArgumentException {
-
-        ConfigurationSection dbConfig = this.config.getConfigurationSection('database');
-
-        DatabaseSources databaseType = DatabaseSources.valueOf(dbConfig.getString("databaseType", "mysql").toUpperCase());
-
-        HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setPoolName("PlayTimeTracker");
-        hikariConfig.setMaximumPoolSize(dbConfig.getInt("connections", 4));
-        hikariConfig.setDataSourceClassName(databaseType.dataSourceClassString);
-        hikariConfig.addDataSourceProperty("serverName", dbConfig.getString("host", "localhost"));
-        hikariConfig.addDataSourceProperty("port", dbConfig.getString("port", "3306"));
-        hikariConfig.addDataSourceProperty("databaseName", dbConfig.getString("database", "lilypadChat"));
-        hikariConfig.addDataSourceProperty("user", dbConfig.getString("user", "lilypadChat"));
-        hikariConfig.addDataSourceProperty("password", dbConfig.getString("password", "lilypadChat"));
-
-        if (databaseType == DatabaseSources.MYSQL && dbConfig.getBoolean("useAdvancedOpts", false)) {
-            addMYSQLOpts(hikariConfig);
-        }
-
-        return new HikariDataSource(hikariConfig);
-    }
-
-    private static void addMYSQLOpts (HikariConfig config) {
-        config.addDataSourceProperty("cachePrepStmts", true);
-        config.addDataSourceProperty("prepStmtCacheSize", 250);
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
-        config.addDataSourceProperty("useServerPrepStmts", true);
-    }
-
-
-    private enum DatabaseSources {
-        MARIADB("org.mariadb.jdbc.MySQLDataSource"),
-        MYSQL("org.mariadb.jdbc.MySQLDataSource"),
-        POSTGRESQL("com.impossibl.postgres.jdbc.PGDataSource");
-
-        private final String dataSourceClassString;
-
-        DatabaseSources(String dataSourceClassString) {
-            this.dataSourceClassString = dataSourceClassString;
-        }
-
-        public static String getDataSourceString(String database) throws IllegalArgumentException {
-            return valueOf(database).dataSourceClassString;
-        }
-
-        public static String getDataSourceString(DatabaseSources database) {
-            return database.dataSourceClassString;
         }
     }
 }
