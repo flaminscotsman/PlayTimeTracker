@@ -1,0 +1,5 @@
+enabled_listeners:
+  chat: {}
+  movement:
+    minimumDistance: 10
+    duration: 30

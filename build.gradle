@@ -1,0 +1,83 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'idea'
+    id 'com.github.johnrengelman.shadow' version '1.2.3'
+}
+
+group 'me.flamin'
+version '1.0-SNAPSHOT'
+
+configurations {
+    provided
+}
+
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+        java.srcDirs = []
+        groovy.srcDirs += ["src/main/java"]
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+        scopes.PROVIDED.plus += [ configurations.provided ]
+    }
+}
+
+project.ext {
+    buildVersion = project.getProperty('project.version')
+}
+version = project.getProperty('project.version')
+
+task copyJarToPlugins(type: Copy, overwrite: true, dependsOn:[shadowJar]) {
+    from shadowJar // shortcut for createJar.outputs.files
+    into "./testserver/plugins/"
+}
+
+tasks.withType(Zip) { task ->
+    task.doLast {
+        ant.checksum(file: it.archivePath, algorithm: 'MD5', pattern: "{0}  {1}", fileext: '.md5')
+        ant.checksum(file: it.archivePath, algorithm: 'SHA1', pattern: "{0}  {1}", fileext: '.sha1')
+    }
+}
+
+processResources.doFirst {
+    filter {
+        line -> line
+            .replace('${project.name}', rootProject.name)
+            .replace('${project.build.version}', buildVersion)
+            .replace('${project.url}', project.getProperty('project.url'))
+            .replace('${project.description}', project.getProperty('project.description'))
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        url "http://mvn.yawk.at/"
+    }
+}
+
+dependencies {
+    provided group: 'org.bukkit', name: 'bukkit', version: '1.9-R0.1-SNAPSHOT'
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '2.4.7'
+    compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.4.7'
+    compile group: 'org.codehaus.groovy', name: 'groovy-sql', version: '2.4.7'
+    compile group: 'org.mariadb.jdbc' , name: 'mariadb-java-client', version: '1.1.7'
+    compile group: 'joda-time', name: 'joda-time', version: '2.9.4'
+    compile group: 'org.mongodb', name: 'mongodb-driver', version: '3.4.0-rc1'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}

@@ -1,0 +1,9 @@
+##  Plugin Information  ##
+name: PlayTimeTracker
+version: 0.0.1
+description: Provides cross-server chat.
+##  Original Author     ##
+author: flamin_scotsman
+website: http://mc.flamin.me/plugins/lilypadChat
+main: me.flamin.playtimetracker.PlayTimeTracker
+database: false
