@@ -2,12 +2,17 @@ package me.flamin.playtimetracker
 
 
 import com.mongodb.MongoClient
+import com.mongodb.MongoClientURI
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.UpdateOptions
 import me.flamin.playtimetracker.activity_listeners.*
 import me.flamin.playtimetracker.listeners.LoginListener
 import org.bson.Document
+import org.bukkit.ChatColor
+import org.bukkit.command.Command
+import org.bukkit.command.CommandExecutor
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
@@ -21,7 +26,7 @@ import java.util.logging.Level
 import static com.mongodb.client.model.Filters.*
 import static com.mongodb.client.model.Updates.*
 
-class PlayTimeTracker extends JavaPlugin {
+class PlayTimeTracker extends JavaPlugin implements CommandExecutor {
     private List<AbstractListener> listeners = []
     private Map<String, Class<? extends AbstractListener>> availableListeners = [
             'movement': MovementListener,
@@ -32,9 +37,9 @@ class PlayTimeTracker extends JavaPlugin {
     private Map<UUID, DateTime> last_active_time = new HashMap<>()
     private int timeout_duration
 
-    private def timeoutHandlerRef
+    private timeoutHandlerRef
     private Runnable timeoutHandler = {
-        def expired_players = []
+        def expired_players = new ArrayList<Player>(last_active_time.size())
         lock.lock()
         try {
             last_active_time.iterator().with {iterator ->
@@ -82,6 +87,20 @@ class PlayTimeTracker extends JavaPlugin {
         super.onDisable()
     }
 
+    @Override
+    boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+        if (!command.name.equalsIgnoreCase('playtimetracker')) {
+            return false
+        }
+        if (args.length > 1 || !args[0].equalsIgnoreCase('reload')) {
+            sender.sendMessage(ChatColor.GRAY.toString() + String.format("[PlaytimeTracker] Usage: /%s reload", alias))
+            return true
+        }
+        this.readConfig()
+        sender.sendMessage(ChatColor.GRAY.toString() + "[PlaytimeTracker] Reloaded config.")
+        return true
+    }
+
     synchronized MongoDatabase getDatabase(String database) {
         return this.mongo_client.getDatabase(database)
     }
@@ -91,6 +110,8 @@ class PlayTimeTracker extends JavaPlugin {
     }
 
     boolean onPlayerActivity(Player player, boolean log_change) {
+        lastLocation.put(player.uniqueId, player.location.world)
+
         def previous
         lock.lock()
         try {
@@ -106,10 +127,13 @@ class PlayTimeTracker extends JavaPlugin {
     }
 
     void logPlayerActivityChange(Player player, boolean isAfk) {
+        final database = this.config.getString('database.database', 'PlaytimeTracker')
+        final collection_name = this.config.getString('database.collection', 'Activity')
+
         def task = {
             try {
-                def conn = this.getDatabase('Test')
-                MongoCollection collection = conn.getCollection('Activity')
+                def conn = this.getDatabase(database)
+                MongoCollection collection = conn.getCollection(collection_name)
 
                 Date now = new Date()
 
@@ -166,7 +190,7 @@ class PlayTimeTracker extends JavaPlugin {
         if (this.mongo_client != null) {
             this.mongo_client.close()
         }
-        this.mongo_client = new MongoClient(this.getConfig().getString('database.connection'))
+        this.mongo_client = new MongoClient(new MongoClientURI(this.getConfig().getString('database.connection')))
 
         this.timeout_duration = this.config.getLong('timeout', 30)
         if (this.timeoutHandlerRef != null) {

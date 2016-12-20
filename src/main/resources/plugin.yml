@@ -1,9 +1,19 @@
 ##  Plugin Information  ##
 name: PlayTimeTracker
 version: 0.0.1
-description: Provides cross-server chat.
+description: Provides cross-server & per-world metrics on player activity
 ##  Original Author     ##
 author: flamin_scotsman
-website: http://mc.flamin.me/plugins/lilypadChat
+website: http://mc.flamin.me/plugins/PlayTimeTracker
 main: me.flamin.playtimetracker.PlayTimeTracker
 database: false
+commands:
+    playtimetracker:
+        description: Administrative commands for PlayTimeTracker.
+        aliases: [ptt]
+        permission: playtimetracker.admin
+        usage: /playtimetracker <reload>
+permissions:
+    playtimetracker.admin:
+        description: Allows a user to control playtimetracker
+        default: op

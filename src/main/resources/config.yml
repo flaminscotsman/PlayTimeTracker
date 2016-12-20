@@ -5,4 +5,4 @@ enabled_listeners:
     duration: 30
 
 database:
-  connection: localhost
+  connection: "mongodb://localhost"

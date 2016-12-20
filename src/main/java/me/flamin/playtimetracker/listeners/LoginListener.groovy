@@ -18,18 +18,6 @@ import static com.mongodb.client.model.Updates.*;
 import com.mongodb.client.model.UpdateOptions;
 
 class LoginListener implements Listener {
-    private static final query = """
-    INSERT INTO `session_components` (
-      `session_id`, `server`, `world`, `is_afk`
-    )
-    SELECT
-      session_id, ?, ?, ?
-    FROM `session`
-    JOIN `players`
-    ON `session`.`player` = `players`.`uuid`
-    WHERE `players`.`uuid` = ?
-    AND `session`.`active` = 1
-    """
     private final PlayTimeTracker plugin;
 
     public LoginListener(PlayTimeTracker plugin) {
