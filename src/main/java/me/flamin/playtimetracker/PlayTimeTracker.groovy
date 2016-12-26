@@ -2,6 +2,7 @@ package me.flamin.playtimetracker
 
 
 import com.mongodb.MongoClient
+import com.mongodb.MongoClientOptions
 import com.mongodb.MongoClientURI
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
@@ -9,6 +10,9 @@ import com.mongodb.client.model.UpdateOptions
 import me.flamin.playtimetracker.activity_listeners.*
 import me.flamin.playtimetracker.listeners.LoginListener
 import org.bson.Document
+import org.bson.UuidRepresentation
+import org.bson.codecs.UuidCodecProvider
+import org.bson.codecs.configuration.CodecRegistries
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -29,8 +33,10 @@ import static com.mongodb.client.model.Updates.*
 class PlayTimeTracker extends JavaPlugin implements CommandExecutor {
     private List<AbstractListener> listeners = []
     private Map<String, Class<? extends AbstractListener>> availableListeners = [
+            'block': BlockListener,
+            'chat': ChatListener,
+            'command': CommandListener,
             'movement': MovementListener,
-            'chat': ChatListener
     ]
     private MongoClient mongo_client
     private Lock lock = new ReentrantLock()
@@ -110,8 +116,6 @@ class PlayTimeTracker extends JavaPlugin implements CommandExecutor {
     }
 
     boolean onPlayerActivity(Player player, boolean log_change) {
-        lastLocation.put(player.uniqueId, player.location.world)
-
         def previous
         lock.lock()
         try {
@@ -190,7 +194,15 @@ class PlayTimeTracker extends JavaPlugin implements CommandExecutor {
         if (this.mongo_client != null) {
             this.mongo_client.close()
         }
-        this.mongo_client = new MongoClient(new MongoClientURI(this.getConfig().getString('database.connection')))
+        def codecRegistry = CodecRegistries.fromRegistries(
+                MongoClient.getDefaultCodecRegistry(),
+                CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD))
+        )
+
+        def uri = new MongoClientURI(this.getConfig().getString('database.connection'), MongoClientOptions.builder().codecRegistry(codecRegistry))
+        this.logger.info("Connection to mongodb using ${uri.credentials.userName} / ${uri.credentials.password}")
+
+        this.mongo_client = new MongoClient(uri)
 
         this.timeout_duration = this.config.getLong('timeout', 30)
         if (this.timeoutHandlerRef != null) {
