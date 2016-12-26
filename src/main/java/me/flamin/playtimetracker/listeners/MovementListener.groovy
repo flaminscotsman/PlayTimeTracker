@@ -4,9 +4,7 @@ import me.flamin.playtimetracker.PlayTimeTracker
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerMoveEvent
-import org.bukkit.event.player.PlayerTeleportEvent
 
 class MovementListener implements Listener {
     private final PlayTimeTracker plugin;
