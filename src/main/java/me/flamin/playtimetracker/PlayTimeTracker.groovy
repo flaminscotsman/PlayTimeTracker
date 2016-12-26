@@ -42,6 +42,7 @@ class PlayTimeTracker extends JavaPlugin implements CommandExecutor {
     private Lock lock = new ReentrantLock()
     private Map<UUID, DateTime> last_active_time = new HashMap<>()
     private int timeout_duration
+    private ServerNameResolver serverNameResolver
 
     private timeoutHandlerRef
     private Runnable timeoutHandler = {
@@ -151,7 +152,7 @@ class PlayTimeTracker extends JavaPlugin implements CommandExecutor {
                                 push(
                                         'activity_tracker',
                                         new Document([
-                                                'server'    : this.server.name,
+                                                'server'    : this.serverNameResolver.serverName,
                                                 'world'     : player.location.world.name,
                                                 'is_afk'    : isAfk,
                                                 'start_time': now
@@ -190,6 +191,8 @@ class PlayTimeTracker extends JavaPlugin implements CommandExecutor {
 
     private synchronized readConfig() {
         this.reloadConfig()
+
+        this.serverNameResolver = new ServerNameResolver(this);
 
         if (this.mongo_client != null) {
             this.mongo_client.close()

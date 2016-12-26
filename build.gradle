@@ -63,6 +63,7 @@ processResources.doFirst {
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven {
         url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
     }
@@ -73,6 +74,7 @@ repositories {
 
 dependencies {
     provided group: 'org.bukkit', name: 'bukkit', version: '1.9-R0.1-SNAPSHOT'
+    provided group: 'lilypad.client.connect', name: 'api', version: '0.0.1-SNAPSHOT'
     compile group: 'com.zaxxer', name: 'HikariCP', version: '2.4.7'
     compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.4.7'
     compile group: 'org.codehaus.groovy', name: 'groovy-sql', version: '2.4.7'
