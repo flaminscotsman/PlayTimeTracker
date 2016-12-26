@@ -83,5 +83,7 @@ dependencies {
 }
 
 shadowJar {
+    archiveName = 'PlayTimeTracker.jar'
+
     relocate 'org.joda.time', 'me.flamin.playtimetracker.internal.jodaTime'
 }
