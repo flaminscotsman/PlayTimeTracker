@@ -2,6 +2,7 @@ package me.flamin.playtimetracker.activity_listeners
 
 import com.google.common.collect.ImmutableList
 import me.flamin.playtimetracker.PlayTimeTracker
+import me.flamin.playtimetracker.activity_listeners.AbstractListener
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.PlayerCommandPreprocessEvent

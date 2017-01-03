@@ -4,8 +4,11 @@ import com.mongodb.MongoClient
 import com.mongodb.MongoClientOptions
 import com.mongodb.MongoClientURI
 import com.mongodb.client.MongoDatabase
+import com.mongodb.client.model.Filters.*
 import com.mongodb.client.model.UpdateOptions
+import com.mongodb.client.model.Updates.*
 import me.flamin.playtimetracker.activity_listeners.*
+import me.flamin.playtimetracker.listeners.LoginListener
 import org.bson.Document
 import org.bson.UuidRepresentation
 import org.bson.codecs.UuidCodecProvider
@@ -16,19 +19,14 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitTask
 import org.joda.time.DateTime
 import org.joda.time.Seconds
-
+import java.lang.reflect.Modifier
+import java.util.*
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import java.util.logging.Level
-
-import com.mongodb.client.model.Filters.*
-import com.mongodb.client.model.Updates.*
-import me.flamin.playtimetracker.listeners.LoginListener
-import org.bukkit.scheduler.BukkitTask
-import java.lang.reflect.Modifier
-import java.util.*
 
 class PlayTimeTracker: JavaPlugin(), CommandExecutor {
     private val listeners: MutableList<AbstractListener> = mutableListOf()
