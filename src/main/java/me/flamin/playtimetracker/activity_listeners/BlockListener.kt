@@ -8,24 +8,27 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockMultiPlaceEvent
 import org.bukkit.event.block.BlockPlaceEvent
 
-class BlockListener extends AbstractListener {
-    public static final List<String> signature = ImmutableList.of();
-    protected BlockListener(PlayTimeTracker tracker) {
-        super(tracker, [BlockBreakEvent, BlockMultiPlaceEvent, BlockPlaceEvent])
-    }
+internal class BlockListener constructor(tracker: PlayTimeTracker) : AbstractListener(tracker, arrayListOf(
+        BlockBreakEvent::class.java, BlockMultiPlaceEvent::class.java, BlockPlaceEvent::class.java
+)) {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
-    void onBlockBreak(BlockBreakEvent event) {
+    fun onBlockBreak(event: BlockBreakEvent) {
         this.tracker.onPlayerActivity(event.player)
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
-    void onBlockMultiPlace(BlockMultiPlaceEvent event) {
+    fun onBlockMultiPlace(event: BlockMultiPlaceEvent) {
         this.tracker.onPlayerActivity(event.player)
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
-    void onBlockPlace(BlockPlaceEvent event) {
+    fun onBlockPlace(event: BlockPlaceEvent) {
         this.tracker.onPlayerActivity(event.player)
+    }
+
+    companion object {
+        @Suppress("unused")
+        val signature: List<String> = ImmutableList.of<String>()
     }
 }

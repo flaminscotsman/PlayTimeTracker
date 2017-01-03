@@ -6,14 +6,15 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 
-class CommandListener extends AbstractListener {
-    public static final List<String> signature = ImmutableList.of();
-    protected CommandListener(PlayTimeTracker tracker) {
-        super(tracker, [PlayerCommandPreprocessEvent])
-    }
+internal class CommandListener constructor(tracker: PlayTimeTracker) : AbstractListener(tracker, arrayListOf(PlayerCommandPreprocessEvent::class.java)) {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
-    void onCommandPreProcess(PlayerCommandPreprocessEvent event) {
+    fun onCommandPreProcess(event: PlayerCommandPreprocessEvent) {
         this.tracker.onPlayerActivity(event.player)
+    }
+
+    companion object {
+        @Suppress("unused")
+        val signature: List<String> = ImmutableList.of<String>()
     }
 }

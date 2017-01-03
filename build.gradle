@@ -1,15 +1,19 @@
 buildscript {
+    ext.kotlin_version = '1.0.5'
     repositories {
         jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
-    id 'groovy'
     id 'java'
     id 'idea'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
 }
+apply plugin: 'kotlin'
 
 group 'me.flamin'
 version '1.0-SNAPSHOT'
@@ -21,8 +25,7 @@ configurations {
 sourceSets {
     main {
         compileClasspath += configurations.provided
-        java.srcDirs = []
-        groovy.srcDirs += ["src/main/java"]
+        java.srcDirs += ["src/main/kotlin"]
     }
 }
 
@@ -75,12 +78,9 @@ repositories {
 dependencies {
     provided group: 'org.bukkit', name: 'bukkit', version: '1.9-R0.1-SNAPSHOT'
     provided group: 'lilypad.client.connect', name: 'api', version: '0.0.1-SNAPSHOT'
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '2.4.7'
-    compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.4.7'
-    compile group: 'org.codehaus.groovy', name: 'groovy-sql', version: '2.4.7'
-    compile group: 'org.mariadb.jdbc' , name: 'mariadb-java-client', version: '1.1.7'
     compile group: 'joda-time', name: 'joda-time', version: '2.9.4'
     compile group: 'org.mongodb', name: 'mongodb-driver', version: '3.4.0-rc1'
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
 
