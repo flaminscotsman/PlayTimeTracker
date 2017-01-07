@@ -2,12 +2,12 @@ package me.flamin.playtimetracker.activity_listeners
 
 import com.google.common.collect.ImmutableList
 import me.flamin.playtimetracker.PlayTimeTracker
-import me.flamin.playtimetracker.activity_listeners.AbstractListener
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 
-internal class CommandListener constructor(tracker: PlayTimeTracker) : AbstractListener(tracker, arrayListOf(PlayerCommandPreprocessEvent::class.java)) {
+class CommandListener constructor(tracker: PlayTimeTracker) : AbstractListener(tracker, CommandListener.events) {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     fun onCommandPreProcess(event: PlayerCommandPreprocessEvent) {
@@ -15,7 +15,10 @@ internal class CommandListener constructor(tracker: PlayTimeTracker) : AbstractL
     }
 
     companion object {
+        @JvmStatic
         @Suppress("unused")
         val signature: List<String> = ImmutableList.of<String>()
+
+        private val events: List<Class<out Event>> = arrayListOf(PlayerCommandPreprocessEvent::class.java)
     }
 }
