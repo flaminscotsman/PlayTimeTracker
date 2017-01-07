@@ -1,5 +1,6 @@
 package me.flamin.playtimetracker
 
+import com.google.common.primitives.Primitives
 import com.mongodb.MongoClient
 import com.mongodb.MongoClientOptions
 import com.mongodb.MongoClientURI
@@ -18,6 +19,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
 import org.joda.time.DateTime
@@ -28,7 +30,7 @@ import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import java.util.logging.Level
 
-class PlayTimeTracker: JavaPlugin(), CommandExecutor {
+class PlayTimeTracker : JavaPlugin(), CommandExecutor {
     private val listeners: MutableList<AbstractListener> = mutableListOf()
     private val availableListeners: Map<String, Class<out AbstractListener>> = mapOf(
             "block" to BlockListener::class.java,
@@ -144,7 +146,7 @@ class PlayTimeTracker: JavaPlugin(), CommandExecutor {
                                         "activity_tracker",
                                         Document(mapOf(
                                                 "server" to this.serverNameResolver!!.getServerName(),
-                                                "world"  to player.location.world.name,
+                                                "world" to player.location.world.name,
                                                 "is_afk" to isAfk,
                                                 "start_time" to now
                                         ))
@@ -200,8 +202,8 @@ class PlayTimeTracker: JavaPlugin(), CommandExecutor {
         this.timeoutHandlerRef = this.server.scheduler.runTaskTimerAsynchronously(this, this.timeoutHandler, 0L, 20L)
 
         // Clean up any old activity_listeners
-        listeners.forEach {listener ->
-            listener.events.forEach {event ->
+        listeners.forEach { listener ->
+            listener.events.forEach { event ->
                 event.newInstance().handlers.unregister(listener)
             }
         }
@@ -215,17 +217,34 @@ class PlayTimeTracker: JavaPlugin(), CommandExecutor {
             }
             val clazz = this.availableListeners[listener_name]!!
             val args: MutableList<Any> = mutableListOf(this)
-            val field = clazz.declaredFields.first { it.name == "signature" && Modifier.isStatic(it.modifiers) }
-            (field.get(null) as List<String>).forEach { key ->
+            val field = clazz.declaredMethods.first { it.name == "getSignature" && Modifier.isStatic(it.modifiers) }
+            (field(null) as List<String>).forEach { key ->
                 val conf = listener_configs.getConfigurationSection(listener_name)
                 if (!conf.contains(key)) {
                     throw InstantiationException("Missing configuration entry for ${key} for listener ${listener_name}")
                 }
                 args.add(conf.get(key))
             }
-            val listener = clazz.getDeclaredConstructor(*args.map { it.javaClass }.toTypedArray()).newInstance(*args.toTypedArray())
-            this.server.pluginManager.registerEvents(listener, this)
-            this.listeners.add(listener)
+            val listener = clazz.declaredConstructors.first {
+                val types = it.parameterTypes
+                if (types.size != args.size) {
+                    return@first false
+                }
+                types.mapIndexed { idx, paramClass ->
+                    if (paramClass.isPrimitive) {
+                        val boxed_class = Primitives.wrap(paramClass)
+                        // If the wrapper class is the same as that of the argument, continue; otherwise check both are
+                        //   numerical, as java will then unbox & widen/shrink to fit!
+                        boxed_class.isInstance(args.get(idx)) || (
+                                Number::class.java.isAssignableFrom(boxed_class)
+                                && Number::class.java.isAssignableFrom(args.get(idx).javaClass)
+                        )
+                    } else {
+                        paramClass.isInstance(args.get(idx))
+                    }}.reduce { a, b -> a && b }
+            }.newInstance(*args.toTypedArray())
+            this.server.pluginManager.registerEvents(listener as Listener, this)
+            this.listeners.add(listener as AbstractListener)
         }
     }
 }
