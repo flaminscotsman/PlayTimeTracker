@@ -6,7 +6,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 
-class LoginListener constructor(private val plugin: PlayTimeTracker): Listener {
+class LoginListener constructor(private val plugin: PlayTimeTracker) : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     fun playerJoinListener(event: PlayerJoinEvent) {
         this.plugin.onPlayerActivity(event.player)

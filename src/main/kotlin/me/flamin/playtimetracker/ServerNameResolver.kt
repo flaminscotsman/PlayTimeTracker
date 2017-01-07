@@ -18,7 +18,7 @@ import org.bukkit.scheduler.BukkitTask
 import java.util.logging.Level
 
 
-class ServerNameResolver constructor(val plugin: JavaPlugin): Listener {
+class ServerNameResolver constructor(val plugin: JavaPlugin) : Listener {
     private var attempt: Int = 0
     private var resolvers: List<String>
     private var internal_server_name: String? = null
@@ -48,7 +48,7 @@ class ServerNameResolver constructor(val plugin: JavaPlugin): Listener {
 
     private fun loadResolver() {
         if (!this.plugin.server.isPrimaryThread) {
-            this.plugin.server.scheduler.runTask(this.plugin, {this.loadResolver()})
+            this.plugin.server.scheduler.runTask(this.plugin, { this.loadResolver() })
             return
         }
 
@@ -138,7 +138,7 @@ class ServerNameResolver constructor(val plugin: JavaPlugin): Listener {
                     HandlerList.unregisterAll(this@ServerNameResolver)
                 }
 
-                assert (incomingRegistration is PluginMessageListenerRegistration)
+                assert(incomingRegistration is PluginMessageListenerRegistration)
                 this.plugin.server.messenger.unregisterIncomingPluginChannel(
                         incomingRegistration!!.plugin,
                         incomingRegistration!!.channel,
