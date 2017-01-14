@@ -85,6 +85,7 @@ class PlayTimeTracker : JavaPlugin(), CommandExecutor {
             this.server.pluginManager.disablePlugin(this)
         }
         this.server.pluginManager.registerEvents(LoginListener(this), this)
+        this.server.pluginManager.registerEvents(MovementListener(this), this)
     }
 
     override fun onCommand(sender: CommandSender, command: Command, alias: String, args: Array<String>): Boolean {
