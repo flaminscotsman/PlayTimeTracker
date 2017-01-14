@@ -10,6 +10,7 @@ import com.mongodb.client.model.UpdateOptions
 import com.mongodb.client.model.Updates.*
 import me.flamin.playtimetracker.activity_listeners.*
 import me.flamin.playtimetracker.listeners.LoginListener
+import me.flamin.playtimetracker.listeners.WorldChangeListener
 import org.bson.Document
 import org.bson.UuidRepresentation
 import org.bson.codecs.UuidCodecProvider
@@ -85,7 +86,7 @@ class PlayTimeTracker : JavaPlugin(), CommandExecutor {
             this.server.pluginManager.disablePlugin(this)
         }
         this.server.pluginManager.registerEvents(LoginListener(this), this)
-        this.server.pluginManager.registerEvents(MovementListener(this), this)
+        this.server.pluginManager.registerEvents(WorldChangeListener(this), this)
     }
 
     override fun onCommand(sender: CommandSender, command: Command, alias: String, args: Array<String>): Boolean {

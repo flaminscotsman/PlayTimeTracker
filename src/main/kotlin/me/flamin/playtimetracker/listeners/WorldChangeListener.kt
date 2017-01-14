@@ -6,7 +6,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 
-class MovementListener constructor(private val plugin: PlayTimeTracker) : Listener {
+class WorldChangeListener constructor(private val plugin: PlayTimeTracker) : Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun playerMoveListener(event: PlayerMoveEvent) {
         if (event.from.world != event.to.world) {
